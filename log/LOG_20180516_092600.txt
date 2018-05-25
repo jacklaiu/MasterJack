@@ -1,0 +1,5 @@
+[2018-05-16 09:26:01]: 监听程序启动
+[2018-05-16 09:26:18]: get_html_forWencai Execption
+[2018-05-16 09:26:37]: get_html_forWencai Execption
+[2018-05-16 09:26:56]: get_html_forWencai Execption
+[2018-05-16 11:30:01]: ----------------->不在设置的交易时间内
