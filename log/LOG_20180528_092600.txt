@@ -1,0 +1,5 @@
+[2018-05-28 09:26:01]: 监听程序启动
+[2018-05-28 09:26:16]: get_html_forWencai Execption
+[2018-05-28 09:26:33]: get_html_forWencai Execption
+[2018-05-28 09:26:50]: get_html_forWencai Execption
+[2018-05-28 10:12:31]: 已写入执行句子：603776,永安行,100,46.77,0
