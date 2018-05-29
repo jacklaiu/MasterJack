@@ -46,15 +46,29 @@ def buyAction(code, name, price, posi):
     f_config.close()
     pm.sendBuyDoneEmail(code)
     lu.log("已写入执行句子：" + config_words)
-    requests.get('http://95.163.200.245:11252/chicang/write/' + str(code))
+    f = open('persist.txt', 'w')
+    f.write(code)
+    f.close()
 
-def sellAction(code, name, price, posi):
+def sellAction(code=None, name=None, price=None, posi='100'):
+    if name is None:
+        df = gs.getDataFrame(code)
+        name = gs.getStockName(df)
+        price = str(round(float(df['b1_p'][0]), 2))
+        posi = '100'
+    if du.getHMS() < '09:25:00':
+        df = gs.getDataFrame(code)
+        pre_close = str(round(float(df['pre_close'][0]), 2))
+        price = round(float(pre_close) * 0.92, 2)
     config_words = code + "," + name + "," + posi + "," + str(price) + ",0"
     f_config = open('C:/auto/SellAction.txt', 'w')
     f_config.write(config_words)
     f_config.close()
-    #pm.sendSellDoneEmail(code)
+    pm.sendSellDoneEmail(code)
     lu.log("SellAction: 已写入执行句子：" + config_words)
+    f = open('persist.txt', 'w')
+    f.write("")
+    f.close()
 
 def sellIn0925():
     res = requests.get("http://95.163.200.245:11252/chicang/read")
@@ -77,41 +91,29 @@ def sellIn0925():
             print('[' + du.getHMS() + ']:sellIn0925 waitting...')
 
 def serialListenForSell():
-    res = requests.get("http://95.163.200.245:11252/chicang/read")
-    code = str(res.text)
-    print("[" + str(du.getHMS()) + "]:已获取code:" + code)
+    f = open('persist.txt', 'r')
+    code = str(f.readline())
+    f.close()
     if code is not None and code != 'Nothing' and code != "":
-        try:
-            maxRate = float(gs.getRate(gs.getDataFrame(code)))
-        except Exception as e:
-            return
+        print("[" + str(du.getHMS()) + "]:已获取code:" + code)
+        df = gs.getDataFrame(code)
+        pre_b1_v = float(df['b1_v'][0])
         while True:
+            df = gs.getDataFrame(code)
             rate = float(gs.getRate(gs.getDataFrame(code)))
-            print("[" + str(du.getHMS()) + "]:持续监听卖出 maxRate:" + str(maxRate) + "->rate:" + str(rate) + "->dis:" + str(rate - maxRate))
-            if rate < -2:
-                maxRate = rate
-                continue
-            if rate > maxRate:
-                maxRate = rate
-            elif float(maxRate - rate) > 1 or (du.getHMS() > Config.StartTime and rate < 4):
-                df = gs.getDataFrame(code)
-                name = gs.getStockName(df)
-                price = gs.getPrice(df)
-                sellAction(code, name, price, '30')
-                time.sleep(3)
-                df = gs.getDataFrame(code)
-                price = gs.getPrice(df)
-                sellAction(code, name, price, '50')
-                time.sleep(3)
-                df = gs.getDataFrame(code)
-                price = gs.getPrice(df)
-                sellAction(code, name, price, '100')
-                requests.get("http://95.163.200.245:11252/chicang/deleteall")
+            if rate > 9.89:
+                b1_v = float(df['b1_v'][0])
+                if pre_b1_v - b1_v > 1280:
+                    sellAction(code=code)
+                    break
+            else:
+                sellAction(code=code)
                 break
-            time.sleep(10)
+            print("[" + str(du.getHMS()) + "]:持续监听卖出->rate:" + str(rate) + "->b1_v:" + str(pre_b1_v) + "->volumeDis:" + str(pre_b1_v - b1_v))
+            pre_b1_v = float(df['b1_v'][0])
+            time.sleep(5)
     else:
-        print("没有持仓")
-
+        print("[" + str(du.getHMS()) + "]:没有持仓")
 
 def getForbiddenCodeString(line, forbidden_control_msg):
     print("!!!!!!!!!!!!!!!!!!!!!!!!!!forbidden_control_msg.count: " + str(forbidden_control_msg['count']))
