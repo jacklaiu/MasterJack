@@ -9,6 +9,7 @@ import time
 import GupiaoDataSource
 import Config
 import LogUtil as lu
+import DateUtil as du
 import Judgement
 import Postmaster
 
@@ -164,6 +165,11 @@ class StockWatcher:
         rate_underZero_codes = []
 
         while True:
+
+            if du.getHMS() > '11:30:00' and du.getHMS() < '12:59:30' :
+                time.sleep(10)
+                print('sleeping...')
+
             obj = Action.getForbiddenCodeString(forbidden_line, forbidden_control_msg)
             forbidden_control_msg = obj['msg']
             forbidden_line = obj['line']
