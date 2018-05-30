@@ -94,6 +94,10 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
     yesterdayIsZhangting = False
     count = 0
     isHasPlus4PercentDay = False
+    pre_o_rate = 0
+    pre_h_rate = 0
+    pre_c_rate = 0
+    days_ForCaculating = 20
     for x in range(len(df.index)):
         if x == 0:
             pre_close = df['close'].iloc[x]
@@ -115,7 +119,7 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
         # 当日开盘幅度
         o_rate = round(float((open - pre_close) / pre_close) * 100, 2)
         # 保证取到14天的数据
-        if count + 20 < len(df.index):
+        if count + days_ForCaculating < len(df.index):
             pre_close = df['close'].iloc[x]
             count = count + 1
             yesterdayIsZhangting = False
@@ -160,6 +164,9 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
         if h_rate > 9.5 and (h_rate - c_rate) < 1:
             yesterdayIsZhangting = True
         pre_close = df['close'].iloc[x]
+        pre_o_rate = o_rate
+        pre_h_rate = h_rate
+        pre_c_rate = c_rate
         count = count + 1
 
     if riskcount < 1 and riskcount > -1:
