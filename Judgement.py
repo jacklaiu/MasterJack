@@ -86,18 +86,20 @@ def startListenIsBigEmotionGood():
 
 #风险等级：板后高开大幅下挫 > 烂板 > 低开低走 > 低沉走势
 def risk(code, startYMD = du.getPreDayYMD(1)):
+    days_ForCaculating = 20
     today = startYMD
-    preOneDay = du.getPreDayYMD(30, startYMD)
+    preOneDay = du.getPreDayYMD(days_ForCaculating+10, startYMD)
     df = ts.get_k_data(code, preOneDay, today)
     pre_close = 0
     riskcount = 0
     yesterdayIsZhangting = False
     count = 0
+    little_shangying_count = 0
     isHasPlus4PercentDay = False
     pre_o_rate = 0
     pre_h_rate = 0
     pre_c_rate = 0
-    days_ForCaculating = 20
+
     for x in range(len(df.index)):
         if x == 0:
             pre_close = df['close'].iloc[x]
@@ -106,7 +108,6 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
         # date = df['date'].iloc[x]
         # low = df['low'].iloc[x]
         # volume = df['volume'].iloc[x]
-
 
         open = df['open'].iloc[x]
         close = df['close'].iloc[x]
@@ -157,6 +158,11 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
         # !第三等级风险：长上影+长阴实体
         if h_rate - o_rate > 4 and o_rate - c_rate > 4:
             riskcount = riskcount + (c_rate - h_rate) * 1000
+
+        if h_rate - o_rate > 2:
+            if little_shangying_count > 0.618 * days_ForCaculating:
+                riskcount = riskcount - 1
+            little_shangying_count = little_shangying_count + 1
 
         # 统计这么多天来，是否存在实体涨幅大于4
         if c_rate > 4 and c_rate - o_rate > 2:
