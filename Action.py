@@ -101,6 +101,10 @@ def serialListenForSell():
         while True:
             df = gs.getDataFrame(code)
             rate = float(gs.getRate(gs.getDataFrame(code)))
+
+            if rate < 0 and du.getHMS() < "10:30:00":
+                continue
+
             if rate > 9.89:
                 b1_v = float(df['b1_v'][0])
                 if pre_b1_v - b1_v > 1280:
