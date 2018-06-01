@@ -156,7 +156,7 @@ def risk(code, startYMD = du.getPreDayYMD(1)):
                 #print("高开高走统计: " + date)
 
         # !第三等级风险：长上影+长阴实体
-        if (h_rate - o_rate > 4 and o_rate - c_rate > 4) or h_rate - o_rate > 6:
+        if h_rate - o_rate > 4 and o_rate - c_rate > 4:
             riskcount = riskcount + (c_rate - h_rate) * 1000
 
         if h_rate - o_rate > 2:
